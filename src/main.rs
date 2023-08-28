@@ -14,10 +14,11 @@ async fn verify_jwt_handler(my_tokens: web::Json<MyTokens>) -> HttpResponse {
     println!("jwt received: {:?}", my_tokens.jwt);
     println!("jwk received: {:?}", my_tokens.jwk);
 
-    let is_valid = api::verify_jwt(my_tokens);
-    match is_valid {
-        true => HttpResponse::Ok().body("Received token is Valid."),
-        _ => HttpResponse::BadRequest().body("Bad Data"),
+    match api::verify_jwt(&my_tokens.jwt, &my_tokens.jwk) {
+        Ok(true) => HttpResponse::Ok().body("Received token is Valid."),
+        Err(e) => 
+            HttpResponse::BadRequest().body(format!("Error while verifying: {}", e)),
+        _ => HttpResponse::BadGateway().body("Application Server Error"),
     }
 }
 
